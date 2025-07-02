@@ -14,10 +14,10 @@ extern int OBJECT_VERY_CLOSE_THRESHOLD; // 물체 매우 근접 경고 임계값
 
 // --- 전역 변수로 센서 값 저장 ---
 // 현재 센서 값과 분석 상태를 저장하는 변수들입니다.
-extern float currentTemp;     // 현재 온도
-extern float currentHum;      // 현재 습도
-extern int currentDistance;   // 현재 거리
-extern String currentStatus;  // 현재 상태 메시지
+//extern float currentTemp;     // 현재 온도
+//extern float currentHum;      // 현재 습도
+//extern int currentDistance;   // 현재 거리
+//extern String currentStatus;  // 현재 상태 메시지
 
 // --- Wi-Fi 설정 ---
 const char* ssid = "mkHome_2.4Ghz";     // Wi-Fi 이름 (SSID)을 여기에 입력하세요

@@ -6,9 +6,8 @@
 #include <FS.h>          // 파일 시스템 (SPIFFS) 사용을 위해 필요
 #include <SPIFFS.h>      // SPIFFS 사용을 위해 필요
 
-#include "config.h"   // Wi-Fi 설정 및 임계값 정의
-#include "web_page.h" // 웹 페이지 HTML/JS 내용
-
+#include "config.h"    // Wi-Fi 설정 및 임계값 정의 (확인 필요)
+#include "web_page.h"  // 웹 페이지 HTML/JS 내용
 
 // --- DHT11 센서 설정 ---
 #define DHTPIN 4       // DHT11 센서 데이터 핀 (ESP32 GPIO 4)
@@ -24,23 +23,28 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 // --- 웹 서버 설정 ---
 WebServer server(80); // 웹 서버를 80번 포트로 초기화
 
+// --- 예측값을 저장할 전역 변수 ---
+volatile float predictedTemperature = 0.0; 
+volatile float predictedHumidity = 0.0;
+volatile int predictedDistance = 0;
+
 // --- 전역 변수 정의 (config.h에서 extern으로 선언된 변수들을 여기서 실제 메모리에 할당) ---
+// 임계값 변수들
 float HIGH_TEMP_THRESHOLD = 28.0;     // 고온 경고 임계값 (섭씨)
 float HIGH_HUMIDITY_THRESHOLD = 70.0; // 고습 경고 임계값 (%)
 int OBJECT_CLOSE_THRESHOLD = 30;      // 물체 근접 경고 임계값 (cm)
 int OBJECT_VERY_CLOSE_THRESHOLD = 10; // 물체 매우 근접 경고 임계값 (cm)
 
-// 센서 값 및 상태 변수
-float currentTemp = 0.0;
-float currentHum = 0.0;
-int currentDistance = 0;
-String currentStatus = "정상"; // 현재 상태 메시지
+// 센서 값 및 상태 변수 (volatile 추가 - loop와 웹 서버 핸들러 간 공유)
+volatile float currentTemp = 0.0;
+volatile float currentHum = 0.0;
+volatile int currentDistance = 0;
+String currentStatus = "정상"; // 현재 상태 메시지 (웹으로만 전송, 시리얼 플로터에 영향 없음)
 
 // --- 임계값 저장/로드 파일 경로 ---
 const char* THRESHOLDS_FILE = "/thresholds.json";
 
 // --- 함수 정의 ---
-// (모든 함수 정의는 setup()이나 loop() 밖에 있어야 합니다!)
 
 // 임계값을 SPIFFS에 저장하는 함수
 void saveThresholds() {
@@ -94,20 +98,20 @@ void loadThresholds() {
 
   Serial.println("임계값 로드 완료:");
   Serial.printf("  온도: %.1f, 습도: %.1f, 근접: %d, 매우근접: %d\n", 
-                HIGH_TEMP_THRESHOLD, HIGH_HUMIDITY_THRESHOLD, 
-                OBJECT_CLOSE_THRESHOLD, OBJECT_VERY_CLOSE_THRESHOLD);
+               HIGH_TEMP_THRESHOLD, HIGH_HUMIDITY_THRESHOLD, 
+               OBJECT_CLOSE_THRESHOLD, OBJECT_VERY_CLOSE_THRESHOLD);
   file.close();
 }
 
-// ... (이전 C++ 코드 생략) ...
-
-// --- 센서 값 읽고 상태 업데이트 함수 ---
+// --- 센서 값 읽고 상태 업데이트 함수 (시리얼 플로터 출력 포함) ---
 void readAndAnalyzeSensors() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
 
   if (isnan(h) || isnan(t)) {
     Serial.println("DHT11 센서 읽기 실패!");
+    // 오류가 발생해도 이전 값을 유지하거나 0 등으로 설정할 수 있습니다.
+    // currentHum = 0.0; currentTemp = 0.0; // 필요하다면 초기화
   } else {
     currentHum = h;
     currentTemp = t;
@@ -115,12 +119,14 @@ void readAndAnalyzeSensors() {
 
   unsigned int duration = sonar.ping_cm();
   
+  // NewPing 라이브러리는 0을 반환할 경우 '핑 아웃 오브 레인지' 또는 오류를 의미
   if (duration == 0) {
-    currentDistance = MAX_DISTANCE + 1;
+    currentDistance = MAX_DISTANCE + 1; // 측정 불가 또는 최대 거리 초과
   } else {
     currentDistance = duration;
   }
 
+  // 상태 메시지 업데이트 (currentStatus 변수)
   String newStatus = "정상";
   
   if (currentTemp > HIGH_TEMP_THRESHOLD) {
@@ -138,12 +144,14 @@ void readAndAnalyzeSensors() {
     else newStatus += ", 물체 근접";
   }
 
+  // 복합 조건 처리 (가장 높은 우선순위)
   if (currentTemp > HIGH_TEMP_THRESHOLD && currentHum > HIGH_HUMIDITY_THRESHOLD && currentDistance <= OBJECT_CLOSE_THRESHOLD) {
     newStatus = "위험: 고온/고습 및 물체 근접!";
   }
   
   currentStatus = newStatus;
-  //Serial.println("현재 상태: " + currentStatus);
+
+  // 시리얼 플로터 출력을 위해 숫자 값만 탭으로 구분하여 출력
   Serial.print(currentTemp); // 온도
   Serial.print("\t");
   Serial.print(currentHum); // 습도
@@ -156,14 +164,20 @@ void handleRoot() {
   server.send_P(200, "text/html;charset=UTF-8", MAIN_page);
 }
 
+// 센서 데이터 및 예측값을 JSON으로 반환하는 핸들러
 void handleData() {
   readAndAnalyzeSensors(); // 최신 센서 값 및 상태 업데이트
 
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<256> doc; // 예측값을 위해 약간 더 크게 설정
   doc["temperature"] = currentTemp;
   doc["humidity"] = currentHum;
   doc["distance"] = currentDistance;
-  doc["status"] = currentStatus;
+  doc["status"] = currentStatus; // 현재 센서값에 기반한 상태
+
+  // 예측값 추가!
+  doc["predictedTemperature"] = predictedTemperature;
+  doc["predictedHumidity"] = predictedHumidity;
+  doc["predictedDistance"] = predictedDistance;
 
   String jsonOutput;
   serializeJson(doc, jsonOutput);
@@ -235,11 +249,11 @@ void setup() {
   Serial.println("SPIFFS 마운트 성공");
   loadThresholds(); // 저장된 임계값 로드
 
-  dht.begin();
+  dht.begin(); // DHT 센서 시작
 
   Serial.print("Wi-Fi 연결 중: ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
+  Serial.println(ssid); // config.h에서 정의된 ssid 사용
+  WiFi.begin(ssid, password); // config.h에서 정의된 password 사용
 
   int retries = 0;
   while (WiFi.status() != WL_CONNECTED && retries < 20) {
@@ -258,12 +272,43 @@ void setup() {
     Serial.println(WiFi.macAddress());
     // ----------------------
 
+    // 예측값을 받을 POST 핸들러
+    server.on("/predict", HTTP_POST, []() {
+      if (server.hasArg("plain")) {
+        String body = server.arg("plain");
+        Serial.println("Received prediction: " + body); // 디버그용
+        
+        DynamicJsonDocument doc(256); // 적절한 메모리 크기
+        DeserializationError error = deserializeJson(doc, body);
+
+        if (error) {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.f_str());
+          server.send(400, "text/plain", "Bad Request");
+          return;
+        }
+
+        predictedTemperature = doc["temp_pred"].as<float>();
+        predictedHumidity = doc["hum_pred"].as<float>();
+        predictedDistance = doc["dist_pred"].as<int>();
+        
+        Serial.print("Predicted T: "); Serial.println(predictedTemperature);
+        Serial.print("Predicted H: "); Serial.println(predictedHumidity);
+        Serial.print("Predicted D: "); Serial.println(predictedDistance);
+
+        server.send(200, "text/plain", "Prediction received");
+      } else {
+        server.send(400, "text/plain", "Bad Request");
+      }
+    });
+
+    // --- 웹 서버 핸들러 매핑 ---
     server.on("/", handleRoot);
-    server.on("/data", handleData);
+    server.on("/data", handleData); // handleData 함수를 사용하도록 수정
     server.on("/getThresholds", handleGetThresholds); 
     server.on("/setThresholds", HTTP_POST, handleSetThresholds);
 
-    server.begin();
+    server.begin(); // 웹 서버 시작
     Serial.println("HTTP 웹 서버 시작됨.");
   } else {
     Serial.println("\nWi-Fi 연결 실패! 다시 시도하거나 SSID/PW 확인하세요.");
@@ -273,5 +318,23 @@ void setup() {
 
 // --- loop() 함수 ---
 void loop() {
-  server.handleClient();
+  // 1. 웹 서버 클라이언트 요청을 처리합니다.
+  // 이 함수가 Python 스크립트로부터의 HTTP POST 요청 (예측값)을 받아서 처리합니다.
+  server.handleClient(); 
+
+  // 2. 센서 값을 읽고, 웹 페이지에 표시될 currentTemp, currentHum, currentDistance, currentStatus를 업데이트합니다.
+  // 이 함수 내부에서 센서 데이터의 시리얼 플로터 출력이 이루어지고 있습니다.
+  readAndAnalyzeSensors(); 
+  
+  // 3. (IMPORTANT) 시리얼 포트로부터 데이터를 읽고 파싱하는 모든 로직을 제거해야 합니다.
+  // 이 부분은 Python이 HTTP로 통신하고, ESP32는 자체 센서 값을 시리얼로 출력하는 경우 불필요합니다.
+  // 즉, 아래와 같은 코드가 있다면 삭제해주세요:
+  //if (Serial.available()) {
+  //   String line = Serial.readStringUntil('\n');
+  //   line.trim();
+  //  // ... (여기서 line을 파싱하는 모든 코드) ...
+  // }
+
+  // 4. 센서 값을 읽는 간격을 조절합니다. (예: 1초 대기)
+  delay(1000); 
 }
