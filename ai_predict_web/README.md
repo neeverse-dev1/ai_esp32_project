@@ -16,6 +16,24 @@
 - https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe (python 버전 : 3.12 추천)
 
 <img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_0.png" width="480" height="320"/>
+
 > add python.exe to path 체크 (시스템 환경변수 등록)
+
 <img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_2.png" width="480" height="320"/>
+
 <img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_3.png" width="480" height="320"/>
+
+
+### (3) git bash 설치 및 파이썬 설치 확인
+
+1. git bash 설치 
+- git bash 다운 페이지 https://git-scm.com/
+
+> 참고 : https://velog.io/@selenium/Git-Git-Bash-%EC%84%A4%EC%B9%98-Windows-OS
+
+2. git bash 실행
+- python 설치 및 버전 확인
+
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_python_check.png" width="480" height="320"/>
+
+## 2. git bash (터미널) 이용하여
