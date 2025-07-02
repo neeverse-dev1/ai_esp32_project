@@ -276,7 +276,7 @@ void setup() {
     server.on("/predict", HTTP_POST, []() {
       if (server.hasArg("plain")) {
         String body = server.arg("plain");
-        Serial.println("Received prediction: " + body); // 디버그용
+        // Serial.println("Received prediction: " + body); // 디버그용
         
         DynamicJsonDocument doc(256); // 적절한 메모리 크기
         DeserializationError error = deserializeJson(doc, body);
@@ -292,9 +292,9 @@ void setup() {
         predictedHumidity = doc["hum_pred"].as<float>();
         predictedDistance = doc["dist_pred"].as<int>();
         
-        Serial.print("Predicted T: "); Serial.println(predictedTemperature);
-        Serial.print("Predicted H: "); Serial.println(predictedHumidity);
-        Serial.print("Predicted D: "); Serial.println(predictedDistance);
+        //Serial.print("Predicted T: "); Serial.println(predictedTemperature);
+        //Serial.print("Predicted H: "); Serial.println(predictedHumidity);
+        //Serial.print("Predicted D: "); Serial.println(predictedDistance);
 
         server.send(200, "text/plain", "Prediction received");
       } else {

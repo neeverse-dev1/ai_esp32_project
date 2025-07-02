@@ -20,7 +20,7 @@ extern int OBJECT_VERY_CLOSE_THRESHOLD; // 물체 매우 근접 경고 임계값
 //extern String currentStatus;  // 현재 상태 메시지
 
 // --- Wi-Fi 설정 ---
-const char* ssid = "mkHome_2.4Ghz";     // Wi-Fi 이름 (SSID)을 여기에 입력하세요
-const char* password = "mk800130"; // Wi-Fi 비밀번호를 여기에 입력하세요
+const char* ssid = "xxxxxxxxx";     // Wi-Fi 이름 (SSID)을 여기에 입력하세요
+const char* password = "xxxxxxxx"; // Wi-Fi 비밀번호를 여기에 입력하세요
 
 #endif // CONFIG_H

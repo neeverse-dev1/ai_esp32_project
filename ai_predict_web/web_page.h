@@ -38,10 +38,10 @@ const char MAIN_page[] PROGMEM = R"=====(
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container-fluid">
   <h1>ESP32 센서 모니터링</h1>
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-2">
       <div class="data-item"><span class="label">현재 시간:</span> <span id="current-time" class="value">--:--:--</span></div>
       <div class="data-item"><span class="label">온도:</span> <span id="temperature" class="value">--.- °C</span></div>
       <div class="data-item"><span class="label">습도:</span> <span id="humidity" class="value">--.- %</span></div>
@@ -76,7 +76,7 @@ const char MAIN_page[] PROGMEM = R"=====(
       </div>
 
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5">
       <div class="chart-container">
         <h2>온도 변화</h2>
         <canvas id="tempChart"></canvas>
@@ -85,6 +85,8 @@ const char MAIN_page[] PROGMEM = R"=====(
         <h2>습도 변화</h2>
         <canvas id="humChart"></canvas>
       </div>
+    </div>
+    <div class="col-md-5">
       <div class="chart-container">
         <h2>거리 변화</h2>
         <canvas id="distChart"></canvas>
@@ -259,33 +261,7 @@ var initCharts = () => {
           beginAtZero: false
         }
       },
-      plugins: {
-        annotation: {
-          annotations: {
-            tempThresholdLine1: {
-              type: 'line',
-              yMin: currentTempThreshold,
-              yMax: currentTempThreshold,
-              borderColor: 'rgb(255, 0, 0)', // 빨간색
-              borderWidth: 2,
-              borderDash: [5, 5],
-              label: {
-                content: '고온 임계값',
-                enabled: true,
-                position: 'end'
-              }
-            },
-            tempThresholdLine2: {
-              type: 'line',
-              yMin: currentTempThreshold + 0.5, // 첫 번째 선보다 약간 위
-              yMax: currentTempThreshold + 0.5,
-              borderColor: 'rgb(255, 0, 0)',
-              borderWidth: 2,
-              borderDash: [5, 5]
-            }
-          }
-        }
-      }
+      
     }
   });
 
@@ -311,6 +287,7 @@ var initCharts = () => {
           max: 100
         }
       },
+      
       plugins: {
         annotation: {
           annotations: {
@@ -418,6 +395,8 @@ var initCharts = () => {
 
 // --- window.onload 블록 시작 (초기화 로직) ---
 window.onload = function() {
+  console.log("annotationPlugin is defined:", typeof annotationPlugin !== 'undefined');
+  //Chart.register(annotationPlugin);
   // Chart.js annotation 플러그인 등록
   console.log("ChartjsPluginAnnotation is defined:", typeof ChartjsPluginAnnotation !== 'undefined');
   //Chart.register(ChartjsPluginAnnotation); // <-- 이 줄이 제대로 작동하는지 확인해야 합니다. (주석 해제됨)
