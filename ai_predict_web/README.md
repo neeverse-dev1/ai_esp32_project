@@ -15,6 +15,7 @@
 - Python 다운로드 페이지 (https://www.python.org/downloads/)
 - https://www.python.org/ftp/python/3.12.9/python-3.12.9-amd64.exe (python 버전 : 3.12 추천)
 
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_0.png" width="640" height="480"/>
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_2.png" width="640" height="480"/>
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_3.png" width="640" height="480"/>
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_0.png" width="480" height="320"/>
+> add python.exe to path 체크 (시스템 환경변수 등록)
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_2.png" width="480" height="320"/>
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/python312_install_3.png" width="480" height="320"/>
