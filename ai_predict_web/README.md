@@ -45,7 +45,7 @@
 
 ### (4) 샘플소스 다운로드 
 
-> git clone 하여 샘플소스 다운로드
+> git clone 하여 샘플소스 다운로드 ("C:/드라이브 다운로드)
 
 ```
 git clone https://github.com/neeverse-dev1/ai_esp32_project.git
