@@ -139,3 +139,12 @@ AI 모델 로드 완료.
 ```
 
 (6) 웹브라우져에서 AI 예측 값 확인 
+
+(*) AI 모델 트레이닝
+* sensor data 가 많을수록 좋
+* ai_predictor.py 실행을 멈추고(Ctrl+c) train_model.py 재실행 
+* 또는 터미널(git bash)을 새로 열어 train_model.py 실행
+* pkl 파일, log파일 오버라이딩 됨
+
+
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/esp32_web_predictor_run.png" width="100%" height="100%"/>
