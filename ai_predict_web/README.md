@@ -34,13 +34,14 @@
 2. git bash 실행
 - python 설치 및 버전 확인
 
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_python_check.png" width="480"ㅛheight="320"/>
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_python_check.png" width="480" height="320"/>
+
 
 ## 2. git bash (터미널) 이용하여 소스 다운로드 및 실행
 
 - 탐색기에서 c: 드라이브로 이동해서 마우스 오른쪽 버튼 누르고 "git bash" 선택하면 path가 c:/로 지정됨
 
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_c_drive.png" width="480"ㅛheight="320"/>
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_c_drive.png" width="480" height="320"/>
 
 ### (4) 샘플소스 다운로드 
 
@@ -50,5 +51,5 @@
 git clone https://github.com/neeverse-dev1/ai_esp32_project.git
 ```
 
-<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_clone_repo.png" width="480"ㅛheight="320"/>
+<img src="https://github.com/neeverse-dev1/ai_esp32_project/blob/main/images/git_bash_clone_repo.png" width="480" height="320"/>
 
